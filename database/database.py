@@ -1,14 +1,23 @@
 from sqlalchemy import create_engine #type: ignore
 from sqlalchemy.orm import sessionmaker #type: ignore
-from models import Base #type: ignore
+from dotenv import load_dotenv #type: ignore
+import os
+from .schema import Base
 
-DATABASE_URL = "postgresql+psycopg2://user:password@hostname:port/dbname"
+load_dotenv()
 
-# Create the engine (connection) to the database
+USER = os.getenv("user")
+PASSWORD = os.getenv("password")
+HOST = os.getenv("host")
+PORT = os.getenv("port")
+DBNAME = os.getenv("dbname")
+POOLMODE = os.getenv("pool_mode")
+
+DATABASE_URL = f"postgresql+psycopg2://{USER}:{PASSWORD}@{HOST}:{PORT}/{DBNAME}?sslmode=require"
+
 engine = create_engine(DATABASE_URL)
 
-# Create a sessionmaker that will handle the sessions for us
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Create the tables in the database (if they don't exist already)
+# Create tables (only for initial setup or development)
 Base.metadata.create_all(bind=engine)

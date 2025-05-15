@@ -4,18 +4,20 @@ from sqlalchemy.ext.declarative import declarative_base #type: ignore
 from sqlalchemy.orm import relationship, sessionmaker #type: ignore
 from sqlalchemy.dialects.postgresql import UUID #type: ignore
 
+
 Base = declarative_base()
 
 # define the database models
 class Role(Base):
     __tablename__ = 'roles'
     role_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    role = Column(String, unique=True, nullable=False)
+    role_type = Column(String, unique=False, nullable=False)
+    tier = Column(String, unique=False, nullable=False)
 
 class Features(Base):
     __tablename__ = 'features'
     feature_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    feature = Column(String, unique=True, nullable=False)
+    feature_name = Column(String, unique=True, nullable=False)
 
 class Roles_Access_Features(Base):
     __tablename__ = 'roles_access_features'
