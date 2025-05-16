@@ -8,6 +8,13 @@ from sqlalchemy.dialects.postgresql import UUID #type: ignore
 Base = declarative_base()
 
 # define the database models
+
+class AuthUser(Base):
+    __tablename__ = 'users'
+    __table_args__ = {'schema': 'auth'}
+
+    id = Column(String, primary_key=True)
+
 class Role(Base):
     __tablename__ = 'roles'
     role_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)

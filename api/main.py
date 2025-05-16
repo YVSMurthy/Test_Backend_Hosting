@@ -54,7 +54,7 @@ def booleanFilter(feature_list):
 def root():
     return {"message": "Backend is working fine"}
 
-@app.get("/login")
+@app.get("/get-user-role")
 def login(authorization: Optional[str] = Header(None), db: Session = Depends(get_db)):
     if not authorization:
         raise HTTPException(status_code=401, detail="Authorization header missing")
@@ -66,18 +66,22 @@ def login(authorization: Optional[str] = Header(None), db: Session = Depends(get
         decoded = jwt.decode(token, secret, algorithms=["HS256"], audience="authenticated")
         print(decoded['sub'])
         user_role = crud.find_user_roles(db=db, user_id=decoded['sub'])
-        feature_list = []
-        for feature in crud.find_features_by_role(db=db, role_id=user_role[0].role_id):
-            feature_list.append(feature.feature_name)
-        print(feature_list)
 
+        if not user_role:
+            user = crud.add_default_user_role(db=db, user_id=decoded['sub'])
+            user_role = crud.find_user_roles(db=db, user_id=decoded['sub'])
+            
+        feature_list = [f.feature_name for f in crud.find_features_by_role(db=db, role_id=user_role[0].role_id)]
+
+        
+        print(feature_list)
         feature_list = booleanFilter(feature_list)
 
-        return {"message": "ok", "body":{"user": decoded['sub'], "role": user_role[0].role_type, "tier": user_role[0].tier, "features": feature_list}}
+        return {"detail": "ok", "body":{"user": decoded['sub'], "role": user_role[0].role_type, "tier": user_role[0].tier, "features": feature_list}}
     except ExpiredSignatureError:
-        raise HTTPException(status_code=401, message="Token expired")
+        raise HTTPException(status_code=401, detail="Token expired")
     except InvalidTokenError as e:
-        raise HTTPException(status_code=401, message="Invalid token")
+        raise HTTPException(status_code=401, detail="Invalid token")
 
 @app.get("/secret_key")
 def secret_key():

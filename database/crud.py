@@ -23,6 +23,27 @@ def find_user_roles(db: Session, user_id: str):
     
     return results
 
+# adding user role
+def add_default_user_role(db: Session, user_id: str):
+    freeUserId = db.query(Role.role_id)\
+            .filter(Role.role_type == "user", Role.tier == "free")\
+            .first()
+    
+    user = User_Assigned_Role(user_id=user_id, role_id=freeUserId.role_id)
+    db.add(user)
+    db.commit()
+
+    return user
+
+# update user role
+def update_user_role(db: Session, user_id: str, role_type: str, tier: str):
+    updatedRole = db.query(Role.role_id)\
+            .filter(Role.role_type == role_type, Role.tier == tier)\
+            .first()
+    
+    User_Assigned_Role(user_id=user_id, role_id=updatedRole.role_id)
+    db.commit()
+
 # finding features based on role
 def find_features_by_role(db: Session, role_id: str):
     results = db.query(
